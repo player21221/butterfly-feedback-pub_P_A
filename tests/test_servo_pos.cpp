@@ -22,8 +22,8 @@ int test_1(Json::Value const& jscfg)
 
 int main(int argc, char const*argv[])
 {
-    make_arg_list args({ 
-        {{"-c", "--config"}, "config", "path to json config file", "", true}
+    Arguments args({
+        Argument("-c", "config", "path to json config file", "", ArgumentsCount::One)
     });
 
     int status = 0;

@@ -77,8 +77,8 @@ int launch(Json::Value const& jscfg, F& f)
 
 int main(int argc, char const* argv[])
 {
-    make_arg_list args({
-        {{"-c", "--config"}, "config", "path to json config file", "", true}
+    Arguments args({
+        Argument("-c", "config", "path to json config file", "", ArgumentsCount::One)
     });
 
     int status = 0;

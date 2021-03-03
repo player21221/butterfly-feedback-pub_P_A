@@ -36,12 +36,13 @@ int feedback_loop(Json::Value const& jscfg)
 
     servo->set_torque(0.0);
     servo->stop();
+    return 0;
 }
 
 int main(int argc, char const* argv[])
 {
-    make_arg_list args({
-        {{"-c", "--config"}, "config", "path to json config file", "", true}
+    Arguments args({
+        Argument("-c", "config", "path to json config file", "", ArgumentsCount::One)
     });
 
     int status = 0;
