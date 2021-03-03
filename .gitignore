@@ -1,0 +1,5 @@
+obj
+out
+build
+log*.txt
+*.sublime-workspace
