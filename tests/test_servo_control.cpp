@@ -1,6 +1,7 @@
 #include <cppmisc/traces.h>
 #include <cppmisc/argparse.h>
 #include <cppmisc/threads.h>
+#include <fstream>
 #include "../src/servo_iface.h"
 #include "../src/filters.h"
 
@@ -15,23 +16,40 @@ int feedback_loop(Json::Value const& jscfg)
 
     int64_t t;
     double theta, dtheta;
-    Integrator I_theta;
     bool stop = false;
+    char buf[1024];
+    int sz;
+    std::fstream f("/tmp/log.txt", std::ios_base::out);
+
+    if (f.bad())
+    {
+        err_msg("can't open log file");
+        return -1;
+    }
 
     while (!stop)
     {
+        theta = 0;
+        dtheta = 0;
         int status = servo->get_state(t, theta, dtheta, true);
         if (status < 0)
         {
-            err_msg("received corrupted packed");
+            err_msg("received corrupted packet");
             return -1;
         }
-        I_theta.update(t, theta);
-        double torque = -0.2 * theta - 0.1 * dtheta - 0.1 * I_theta.value();
+        double torque = 0.;
         torque = clamp(torque, -0.1, 0.1);
         servo->set_torque(torque);
-        stop = fabs(theta) < 1e-4 && fabs(dtheta) < 1e-5;
-        info_msg("servo state: ", theta, " ", dtheta, " ", stop);
+        sz = snprintf(buf, sizeof(buf), 
+            "t = %ld, theta = %f, dtheta = %f\n", 
+            t, theta, dtheta
+        );
+        if (sz < 0)
+        {
+            err_msg("can't format message");
+            return -1;
+        }
+        f.write(buf, sz);
     }
 
     servo->set_torque(0.0);
